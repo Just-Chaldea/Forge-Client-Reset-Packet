@@ -1,0 +1,27 @@
+subprojects {
+    apply plugin: 'java'
+
+    group = 'gg.chaldea.client.reset.packet'
+    version = '0.0.1'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    task versionedRelease(type: Copy) {
+        group "build"
+        from('./build/libs/' + rootProject.name + '.jar')
+        into('../release/')
+        include '*.jar'
+        rename { String filename ->
+            filename.replace(".jar", "-${project.version}.jar")
+        }
+    }
+}
