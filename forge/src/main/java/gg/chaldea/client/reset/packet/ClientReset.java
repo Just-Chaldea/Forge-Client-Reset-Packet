@@ -24,6 +24,10 @@ import java.util.function.Supplier;
 @Mod("clientresetpacket")
 public class ClientReset {
 
+    public ClientReset() {
+        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Hello World");
+    }
+
     @SubscribeEvent
     public static void init(FMLCommonSetupEvent event) {
         FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Registering forge reset packet");
