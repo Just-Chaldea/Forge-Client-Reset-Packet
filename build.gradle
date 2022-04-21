@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
 
     group = 'gg.chaldea.client.reset.packet'
     version = '0.0.3'
@@ -13,6 +14,14 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/Just-Chaldea/Forge-Client-Reset-Packet"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 
     task versionedRelease(type: Copy) {
