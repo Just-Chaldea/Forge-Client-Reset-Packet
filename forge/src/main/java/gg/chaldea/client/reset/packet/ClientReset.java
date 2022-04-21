@@ -17,6 +17,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.network.*;
 import net.minecraftforge.registries.GameData;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -25,7 +27,9 @@ import java.util.function.Supplier;
 public class ClientReset {
 
     public ClientReset() {
-        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Hello World");
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        
+        bus.addListener(ClientReset::init);
     }
 
     @SubscribeEvent
