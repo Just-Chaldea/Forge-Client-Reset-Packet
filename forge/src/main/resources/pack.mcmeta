@@ -1,0 +1,6 @@
+{
+    "pack": {
+        "description": "Client reset packet",
+        "pack_format": 6
+    }
+}
