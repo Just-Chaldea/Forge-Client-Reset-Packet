@@ -25,13 +25,15 @@ import java.util.function.Supplier;
 public class ClientReset {
 
     @SubscribeEvent
-    public static void init(final FMLCommonSetupEvent event) {
+    public static void init(FMLCommonSetupEvent event) {
+        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Registering forge reset packet");
         FMLNetworkConstants.handshakeChannel.messageBuilder(S2CReset.class, 98).
                 loginIndex(FMLHandshakeMessages.LoginIndexedMessage::getLoginIndex, FMLHandshakeMessages.LoginIndexedMessage::setLoginIndex).
                 decoder(S2CReset::decode).
                 encoder(S2CReset::encode).
                 consumer(FMLHandshakeHandler.biConsumerFor(ClientReset::handleReset)).
                 add();
+        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Registered forge reset packet");
     }
 
     public static void handleReset(FMLHandshakeHandler handler, S2CReset msg, Supplier<NetworkEvent.Context> contextSupplier) {
