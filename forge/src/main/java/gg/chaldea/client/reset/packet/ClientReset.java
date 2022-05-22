@@ -30,6 +30,8 @@ public class ClientReset {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         
         bus.addListener(ClientReset::init);
+
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
 
     @SubscribeEvent
