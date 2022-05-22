@@ -22,6 +22,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 
 @Mod("clientresetpacket")
 public class ClientReset {
