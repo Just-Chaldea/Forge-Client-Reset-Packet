@@ -17,25 +17,6 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {
-    maven {
-        name = 'spongepowered-repo'
-        url = 'https://repo.spongepowered.org/maven'
-    }
-
-    maven { url 'https://jitpack.io' }
-
-    ivy {
-        setUrl('https://download.nodecdn.net/containers/reforged/server/release')
-        metadataSources {
-            artifact()
-        }
-        patternLayout {
-            artifact('[revision]/[artifact].[ext]')
-        }
-    }
-}
-
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
 }
