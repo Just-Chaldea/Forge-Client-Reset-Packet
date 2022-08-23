@@ -2,11 +2,10 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
-    group = 'gg.chaldea.client.reset.packet'
-    version = '0.0.5'
+    group = 'net.foxmcloud.clientresetpacket'
+    version = '0.1.0'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -14,14 +13,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/Just-Chaldea/Forge-Client-Reset-Packet"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
     }
 
     task versionedRelease(type: Copy) {
