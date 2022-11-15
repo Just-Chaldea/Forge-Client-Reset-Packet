@@ -1,23 +1,24 @@
-package net.foxmcloud.clientresetpacket;
+package gg.chaldea.client.reset.packet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import com.ibm.icu.impl.Pair;
+import gg.chaldea.client.reset.packet.network.S2CReset;
+import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
-import net.foxmcloud.clientresetpacket.network.S2CReset;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -70,12 +71,12 @@ public class ClientReset {
 			if (handshake instanceof SimpleChannel) {
 				handshakeChannel = (SimpleChannel)handshake;
 				logger.info(RESETMARKER, "Registering forge reset packet.");
-				handshakeChannel.messageBuilder(S2CReset.class, 98).
-				loginIndex(S2CReset::getLoginIndex, S2CReset::setLoginIndex).
-				decoder(S2CReset::decode).
-				encoder(S2CReset::encode).
-				consumer(HandshakeHandler.biConsumerFor(ClientReset::handleReset)).
-				add();
+				handshakeChannel.messageBuilder(S2CReset.class, 98)
+						.loginIndex(S2CReset::getLoginIndex, S2CReset::setLoginIndex)
+						.decoder(S2CReset::decode)
+						.encoder(S2CReset::encode)
+						.consumerNetworkThread(HandshakeHandler.biConsumerFor(ClientReset::handleReset))
+						.add();
 				logger.info(RESETMARKER, "Registered forge reset packet successfully.");
 			}
 		}
@@ -89,7 +90,7 @@ public class ClientReset {
 		Connection connection = context.getNetworkManager();
 
 		if (context.getDirection() != NetworkDirection.LOGIN_TO_CLIENT && context.getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
-			connection.disconnect(new TextComponent("Illegal packet received, terminating connection"));
+			connection.disconnect(Component.literal("Illegal packet received, terminating connection"));
 			throw new IllegalStateException("Invalid packet received, aborting connection");
 		}
 
@@ -135,7 +136,7 @@ public class ClientReset {
 			}
 
 			// Clear
-			Minecraft.getInstance().clearLevel(new GenericDirtMessageScreen(new TextComponent("Negotiating..."/*"connect.negotiating"*/)));
+			Minecraft.getInstance().clearLevel(new GenericDirtMessageScreen(Component.literal("Negotiating..."/*"connect.negotiating"*/)));
 
 			// Restore
 			Minecraft.getInstance().setCurrentServer(serverData);
@@ -148,7 +149,7 @@ public class ClientReset {
 			return true;
 		} catch (Exception ex) {
 			logger.error(RESETMARKER, "Failed to clear, closing connection", ex);
-			context.getNetworkManager().disconnect(new TextComponent("Failed to clear, closing connection"));
+			context.getNetworkManager().disconnect(Component.literal("Failed to clear, closing connection"));
 			return false;
 		}
 	}

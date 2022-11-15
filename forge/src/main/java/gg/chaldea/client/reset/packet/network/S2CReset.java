@@ -1,4 +1,4 @@
-package net.foxmcloud.clientresetpacket.network;
+package gg.chaldea.client.reset.packet.network;
 
 import static net.minecraftforge.network.HandshakeMessages.C2SAcknowledge;
 
