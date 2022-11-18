@@ -20,6 +20,7 @@ import net.minecraftforge.registries.GameData;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Pair;
@@ -97,6 +98,14 @@ public class ClientReset {
 
             // Clear
             Minecraft.getInstance().clearLevel(new DirtMessageScreen(new TranslationTextComponent("connect.negotiating")));
+            try {
+                context.getNetworkManager().channel().pipeline().remove("forge:forge_fixes");
+            } catch (NoSuchElementException ignored) {
+            }
+            try {
+                context.getNetworkManager().channel().pipeline().remove("forge:vanilla_filter");
+            } catch (NoSuchElementException ignored) {
+            }
 
             // Restore
             Minecraft.getInstance().setCurrentServer(serverData);
