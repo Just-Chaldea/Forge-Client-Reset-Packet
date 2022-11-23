@@ -11,22 +11,20 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.network.*;
-import net.minecraftforge.registries.GameData;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.*;
+import net.minecraftforge.registries.GameData;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 @Mod("clientresetpacket")
 public class ClientReset {
@@ -97,7 +95,14 @@ public class ClientReset {
 
             // Clear
             Minecraft.getInstance().clearLevel(new DirtMessageScreen(new TranslationTextComponent("connect.negotiating")));
-
+            try {
+                context.getNetworkManager().channel().pipeline().remove("forge:forge_fixes");
+            } catch (NoSuchElementException ignored) {
+            }
+            try {
+                context.getNetworkManager().channel().pipeline().remove("forge:vanilla_filter");
+            } catch (NoSuchElementException ignored) {
+            }
             // Restore
             Minecraft.getInstance().setCurrentServer(serverData);
         });

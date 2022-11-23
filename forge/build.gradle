@@ -2,13 +2,26 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
+        maven {
+            name = 'sponge'
+            url = 'https://repo.spongepowered.org/maven'
+        }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
+
+repositories {
+    maven {
+        name = 'spongepowered-repo'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+}
 
 minecraft {
     mappings channel: 'official', version: '1.16.5'
@@ -19,6 +32,29 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
+
+    compileOnly 'org.spongepowered:mixin:0.8.3-SNAPSHOT'
+    compileOnly 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+}
+
+sourceSets {
+    main {
+        ext.refMap = "mixins.clientresetpacket.refmap.json"
+    }
+}
+
+jar {
+    manifest.attributes(
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'TweakOrder': 0,
+            'MixinConfigs' : "mixins.clientresetpacket.json"
+    )
+}
+
+mixin {
+    add sourceSets.main, "mixins.clientresetpacket.refmap.json"
 }
 
 build.finalizedBy('versionedRelease')
