@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.MultiplayerScreen;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +34,12 @@ public class MixinNetworkManager {
             this.disconnectedReason = p_150718_1_;
 
             if (Minecraft.getInstance().screen instanceof DirtMessageScreen) {
-                Minecraft.getInstance().setScreen(new DisconnectedScreen(new MultiplayerScreen(new MainMenuScreen()), new StringTextComponent(""), this.disconnectedReason));
+                ITextComponent title = ((DirtMessageScreen)Minecraft.getInstance().screen).getTitle();
+
+                if (title instanceof TranslationTextComponent &&
+                        ((TranslationTextComponent) title).getKey().equals("connect.negotiating")) {
+                    Minecraft.getInstance().setScreen(new DisconnectedScreen(new MultiplayerScreen(new MainMenuScreen()), new StringTextComponent(""), this.disconnectedReason));
+                }
             }
         }
     }
