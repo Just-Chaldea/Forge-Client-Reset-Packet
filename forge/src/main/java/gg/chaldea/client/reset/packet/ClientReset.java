@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.ibm.icu.impl.Pair;
 import gg.chaldea.client.reset.packet.network.S2CReset;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -128,17 +129,20 @@ public class ClientReset {
 
 			// Preserve
 			ServerData serverData = Minecraft.getInstance().getCurrentServer();
+			Pack serverPack = Minecraft.getInstance().getClientPackSource().serverPack;
 
 			// Clear
 			if (Minecraft.getInstance().level == null) {
 				// Ensure the GameData is reverted in case the client is reset during the handshake.
 				GameData.revertToFrozen();
 			}
+			Minecraft.getInstance().getClientPackSource().serverPack = null;
 
 			// Clear
 			Minecraft.getInstance().clearLevel(new GenericDirtMessageScreen(Component.literal("Negotiating..."/*"connect.negotiating"*/)));
 
 			// Restore
+			Minecraft.getInstance().getClientPackSource().serverPack = serverPack;
 			Minecraft.getInstance().setCurrentServer(serverData);
 		});
 
