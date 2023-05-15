@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.7.10",
+  "package": "gg.chaldea.client.reset.packet.mixin",
+  "refmap": "mixins.clientresetpacket.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinFMLHandshakeHandler",
+    "MixinNetworkFilters",
+    "MixinNetworkManager",
+    "VanillaPacketFilterAccessor"
+  ],
+  "client": []
+}
