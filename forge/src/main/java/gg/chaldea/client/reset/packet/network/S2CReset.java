@@ -1,20 +1,19 @@
 package gg.chaldea.client.reset.packet.network;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.HandshakeMessages;
 
-import static net.minecraftforge.fml.network.FMLHandshakeMessages.LoginIndexedMessage;
-
-public class S2CReset extends LoginIndexedMessage {
+public class S2CReset extends HandshakeMessages.LoginIndexedMessage {
 
     public S2CReset() {
         super();
     }
 
-    public void encode(PacketBuffer buffer) {
+    public void encode(FriendlyByteBuf buffer) {
 
     }
 
-    public static S2CReset decode(PacketBuffer buffer) {
+    public static S2CReset decode(FriendlyByteBuf buffer) {
         return new S2CReset();
     }
 }

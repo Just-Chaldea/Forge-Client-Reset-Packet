@@ -5,9 +5,6 @@ subprojects {
     group = 'gg.chaldea.client.reset.packet'
     version = '0.0.6'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
@@ -25,8 +22,9 @@ subprojects {
     }
 
     task versionedRelease(type: Copy) {
+        print mod_name
         group "build"
-        from('./build/libs/forge-' + project.version + '.jar')
+        from('./build/libs/' + mod_name + '-' + project.version + '.jar')
         into('../release/')
         include '*.jar'
         rename { String filename ->

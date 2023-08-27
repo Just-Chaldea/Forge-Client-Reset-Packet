@@ -1,8 +1,8 @@
 package gg.chaldea.client.reset.packet.mixin;
 
-import net.minecraft.network.NetworkManager;
-import net.minecraftforge.network.NetworkFilters;
-import net.minecraftforge.network.VanillaPacketFilter;
+import net.minecraft.network.Connection;
+import net.minecraftforge.network.filters.NetworkFilters;
+import net.minecraftforge.network.filters.VanillaPacketFilter;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ import java.util.function.Function;
 @Mixin(NetworkFilters.class)
 public class MixinNetworkFilters {
 
-    @Shadow(remap = false) @Final private static Map<String, Function<NetworkManager, VanillaPacketFilter>> instances;
+    @Shadow(remap = false) @Final private static Map<String, Function<Connection, VanillaPacketFilter>> instances;
     @Shadow(remap = false) @Final private static Logger LOGGER;
 
     /**
@@ -23,7 +23,7 @@ public class MixinNetworkFilters {
      * @reason Prevent error
      */
     @Overwrite(remap = false)
-    public static void injectIfNecessary(NetworkManager manager)
+    public static void injectIfNecessary(Connection manager)
     {
         instances.forEach((key, filterFactory) -> {
             if (manager.channel().pipeline().get(key) != null) {

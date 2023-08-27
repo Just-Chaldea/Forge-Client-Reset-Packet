@@ -2,25 +2,23 @@ package gg.chaldea.client.reset.packet;
 
 import gg.chaldea.client.reset.packet.network.S2CReset;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.DirtMessageScreen;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.network.login.ClientLoginNetHandler;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.ProtocolType;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.network.Connection;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.*;
+import net.minecraftforge.network.*;
 import net.minecraftforge.registries.GameData;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.client.gui.screens.TitleScreen;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
@@ -34,58 +32,57 @@ public class ClientReset {
         
         bus.addListener(ClientReset::init);
 
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()-> new IExtensionPoint.DisplayTest(()-> NetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
     }
 
     @SubscribeEvent
     public static void init(FMLCommonSetupEvent event) {
-        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Registering forge reset packet");
-        FMLNetworkConstants.handshakeChannel.messageBuilder(S2CReset.class, 98).
-                loginIndex(FMLHandshakeMessages.LoginIndexedMessage::getLoginIndex, FMLHandshakeMessages.LoginIndexedMessage::setLoginIndex).
+        HandshakeHandler.LOGGER.info(HandshakeHandler.FMLHSMARKER, "Registering forge reset packet");
+        NetworkConstants.handshakeChannel.messageBuilder(S2CReset.class, 98).
+                loginIndex(HandshakeMessages.LoginIndexedMessage::getLoginIndex, HandshakeMessages.LoginIndexedMessage::setLoginIndex).
                 decoder(S2CReset::decode).
                 encoder(S2CReset::encode).
-                consumer(FMLHandshakeHandler.biConsumerFor(ClientReset::handleReset)).
+                consumerNetworkThread(HandshakeHandler.biConsumerFor(ClientReset::handleReset)).
                 add();
-        FMLHandshakeHandler.LOGGER.info(FMLHandshakeHandler.FMLHSMARKER, "Registered forge reset packet");
+        HandshakeHandler.LOGGER.info(HandshakeHandler.FMLHSMARKER, "Registered forge reset packet");
     }
 
-    public static void handleReset(FMLHandshakeHandler handler, S2CReset msg, Supplier<NetworkEvent.Context> contextSupplier) {
+    public static void handleReset(HandshakeHandler handler, S2CReset msg, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
-        NetworkManager connection = context.getNetworkManager();
+        Connection connection = context.getNetworkManager();
 
         if (context.getDirection() != NetworkDirection.LOGIN_TO_CLIENT && context.getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
-            connection.disconnect(new StringTextComponent("Illegal packet received, terminating connection"));
+            connection.disconnect(Component.literal("Illegal packet received, terminating connection"));
             throw new IllegalStateException("Invalid packet received, aborting connection");
         }
 
-        FMLHandshakeHandler.LOGGER.debug(FMLHandshakeHandler.FMLHSMARKER, "Received reset from server");
+        HandshakeHandler.LOGGER.debug(HandshakeHandler.FMLHSMARKER, "Received reset from server");
 
         if (!handleClear(context)) {
             return;
         }
 
         NetworkHooks.registerClientLoginChannel(connection);
-        connection.setProtocol(ProtocolType.LOGIN);
-        connection.setListener(new ClientLoginNetHandler(
-                connection, Minecraft.getInstance(), null, statusMessage -> {}
+        connection.setProtocol(ConnectionProtocol.LOGIN);
+        connection.setListener(new ClientHandshakePacketListenerImpl(
+                connection, Minecraft.getInstance(), Minecraft.getInstance().getCurrentServer(),  new TitleScreen(), true,null, statusMessage -> {}
         ));
 
         context.setPacketHandled(true);
-        FMLNetworkConstants.handshakeChannel.reply(
-                new FMLHandshakeMessages.C2SAcknowledge(),
+        NetworkConstants.handshakeChannel.reply(
+                new HandshakeMessages.C2SAcknowledge(),
                 new NetworkEvent.Context(connection, NetworkDirection.LOGIN_TO_CLIENT, 98)
         );
 
-        FMLHandshakeHandler.LOGGER.debug(FMLHandshakeHandler.FMLHSMARKER, "Reset complete");
+        HandshakeHandler.LOGGER.debug(HandshakeHandler.FMLHSMARKER, "Reset complete");
     }
 
     @OnlyIn(Dist.CLIENT)
     public static boolean handleClear(NetworkEvent.Context context) {
         CompletableFuture<Void> future = context.enqueueWork(() -> {
-            FMLHandshakeHandler.LOGGER.debug(FMLHandshakeHandler.FMLHSMARKER, "Clearing");
+            HandshakeHandler.LOGGER.debug(HandshakeHandler.FMLHSMARKER, "Clearing");
 
             // Preserve
-            ServerData serverData = Minecraft.getInstance().getCurrentServer();
 
             // Clear
             if (Minecraft.getInstance().level == null) {
@@ -94,7 +91,7 @@ public class ClientReset {
             }
 
             // Clear
-            Minecraft.getInstance().clearLevel(new DirtMessageScreen(new TranslationTextComponent("connect.negotiating")));
+            Minecraft.getInstance().clearLevel(new GenericDirtMessageScreen(Component.translatable("connect.negotiating")));
             try {
                 context.getNetworkManager().channel().pipeline().remove("forge:forge_fixes");
             } catch (NoSuchElementException ignored) {
@@ -104,17 +101,17 @@ public class ClientReset {
             } catch (NoSuchElementException ignored) {
             }
             // Restore
-            Minecraft.getInstance().setCurrentServer(serverData);
+//            Minecraft.getInstance().setCurrentServer(serverData);
         });
 
-        FMLHandshakeHandler.LOGGER.debug(FMLHandshakeHandler.FMLHSMARKER, "Waiting for clear to complete");
+        HandshakeHandler.LOGGER.debug(HandshakeHandler.FMLHSMARKER, "Waiting for clear to complete");
         try {
             future.get();
-            FMLHandshakeHandler.LOGGER.debug("Clear complete, continuing reset");
+            HandshakeHandler.LOGGER.debug("Clear complete, continuing reset");
             return true;
         } catch (Exception ex) {
-            FMLHandshakeHandler.LOGGER.error(FMLHandshakeHandler.FMLHSMARKER, "Failed to clear, closing connection", ex);
-            context.getNetworkManager().disconnect(new StringTextComponent("Failed to clear, closing connection"));
+            HandshakeHandler.LOGGER.error(HandshakeHandler.FMLHSMARKER, "Failed to clear, closing connection", ex);
+            context.getNetworkManager().disconnect(Component.literal("Failed to clear, closing connection"));
             return false;
         }
     }
